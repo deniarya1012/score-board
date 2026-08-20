@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Scoreboard</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; text-align: center; }
+        .team-box { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { font-size: 1.5rem; text-align: center; width: 100%; padding: 10px; margin-bottom: 10px; }
+        .score-display { font-size: 4rem; font-weight: bold; margin: 10px 0; }
+        button { font-size: 2rem; width: 60px; height: 60px; margin: 5px; cursor: pointer; border-radius: 50%; border: none; background: #004e92; color: white; }
+        button:active { background: #000428; }
+    </style>
+</head>
+<body>
+    <h2>Remote Controller</h2>
+    
+    <div class="team-box">
+        <input type="text" id="nameA" oninput="changeName('A')" value="TIM A">
+        <div class="score-display" id="scoreA">0</div>
+        <button onclick="changeScore('A', -1)">-</button>
+        <button onclick="changeScore('A', 1)">+</button>
+    </div>
+
+    <div class="team-box">
+        <input type="text" id="nameB" oninput="changeName('B')" value="TIM B">
+        <div class="score-display" id="scoreB">0</div>
+        <button onclick="changeScore('B', -1)">-</button>
+        <button onclick="changeScore('B', 1)">+</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let currentScores = { A: 0, B: 0 };
+
+        socket.on('updateData', (data) => {
+            document.getElementById('nameA').value = data.teamA;
+            document.getElementById('nameB').value = data.teamB;
+            document.getElementById('scoreA').innerText = data.scoreA;
+            document.getElementById('scoreB').innerText = data.scoreB;
+            currentScores.A = data.scoreA;
+            currentScores.B = data.scoreB;
+        });
+
+        function changeScore(team, value) {
+            let newScore = currentScores[team] + value;
+            if (newScore < 0) newScore = 0;
+            socket.emit('updateScore', { team: team, score: newScore });
+        }
+
+        function changeName(team) {
+            let newName = document.getElementById('name' + team).value;
+            socket.emit('updateName', { team: team, name: newName });
+        }
+    </script>
+</body>
+</html>
