@@ -1,0 +1,7 @@
+{
+  "name": "scoreboard-pusher-vercel",
+  "version": "1.0.0",
+  "dependencies": {
+    "pusher": "^5.2.0"
+  }
+}
