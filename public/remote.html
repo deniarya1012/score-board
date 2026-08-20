@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Scoreboard</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; text-align: center; }
+        .team-box { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { font-size: 1.5rem; text-align: center; width: 100%; padding: 10px; margin-bottom: 10px; }
+        .score-display { font-size: 4rem; font-weight: bold; margin: 10px 0; }
+        .btn-score { font-size: 2rem; width: 60px; height: 60px; margin: 5px; cursor: pointer; border-radius: 50%; border: none; background: #004e92; color: white; }
+        .btn-reset { font-size: 1.2rem; width: 100%; padding: 15px; margin-top: 10px; cursor: pointer; border-radius: 10px; border: none; background: #d9534f; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Remote Controller</h2>
+    
+    <div class="team-box">
+        <input type="text" id="nameA" oninput="changeName()" value="TIM A">
+        <div class="score-display" id="scoreA">0</div>
+        <button class="btn-score" onclick="changeScore('A', -1)">-</button>
+        <button class="btn-score" onclick="changeScore('A', 1)">+</button>
+    </div>
+
+    <div class="team-box">
+        <input type="text" id="nameB" oninput="changeName()" value="TIM B">
+        <div class="score-display" id="scoreB">0</div>
+        <button class="btn-score" onclick="changeScore('B', -1)">-</button>
+        <button class="btn-score" onclick="changeScore('B', 1)">+</button>
+    </div>
+
+    <button class="btn-reset" onclick="resetScore()">🔄 Reset Skor</button>
+
+    <script>
+        let gameData = { teamA: "TIM A", teamB: "TIM B", scoreA: 0, scoreB: 0 };
+
+        function sendDataToServer() {
+            fetch('/api/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(gameData)
+            });
+        }
+
+        function changeScore(team, value) {
+            if (team === 'A') gameData.scoreA = Math.max(0, gameData.scoreA + value);
+            if (team === 'B') gameData.scoreB = Math.max(0, gameData.scoreB + value);
+            
+            document.getElementById('scoreA').innerText = gameData.scoreA;
+            document.getElementById('scoreB').innerText = gameData.scoreB;
+            sendDataToServer();
+        }
+
+        function changeName() {
+            gameData.teamA = document.getElementById('nameA').value;
+            gameData.teamB = document.getElementById('nameB').value;
+            sendDataToServer();
+        }
+
+        function resetScore() {
+            if (confirm("Reset skor menjadi 0?")) {
+                gameData.scoreA = 0;
+                gameData.scoreB = 0;
+                document.getElementById('scoreA').innerText = 0;
+                document.getElementById('scoreB').innerText = 0;
+                sendDataToServer();
+            }
+        }
+    </script>
+</body>
+</html>
