@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Scoreboard Layar Utama - Turnamen Badminton</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: linear-gradient(135deg, #000428 0%, #004e92 100%); 
+            color: #fff; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Tombol Fullscreen */
+        .btn-fullscreen {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            z-index: 100;
+        }
+
+        .btn-fullscreen:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #00f2fe;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
+            transform: scale(1.05);
+        }
+
+        /* Otomatis sembunyikan tombol saat Fullscreen aktif */
+        :fullscreen .btn-fullscreen,
+        :-webkit-full-screen .btn-fullscreen {
+            display: none !important;
+        }
+
+        /* Judul Turnamen */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 50%, #ffb703 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Scoreboard Container */
+        .scoreboard-container { 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            width: 90%; 
+            max-width: 1300px; 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 50px; 
+            border-radius: 20px; 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+        
+        .team { display: flex; flex-direction: column; align-items: center; width: 45%; }
+        .team-name { font-size: 4rem; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; }
+        .score { font-size: 18rem; font-weight: bold; line-height: 1; text-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .divider { font-size: 6rem; font-weight: bold; color: rgba(255,255,255,0.5); padding-bottom: 50px; }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Fullscreen -->
+    <button class="btn-fullscreen" id="btnFullscreen" onclick="toggleFullScreen()">📺 Full Screen</button>
+
+    <!-- Judul Turnamen -->
+    <div class="header">
+        <h1>Turnamen Badminton Hari Radio ke 81</h1>
+    </div>
+
+    <!-- Papan Skor -->
+    <div class="scoreboard-container">
+        <div class="team">
+            <div class="team-name" id="nameA">TIM A</div>
+            <div class="score" id="scoreA">0</div>
+        </div>
+        <div class="divider">:</div>
+        <div class="team">
+            <div class="team-name" id="nameB">TIM B</div>
+            <div class="score" id="scoreB">0</div>
+        </div>
+    </div>
+
+    <!-- SDK Client Pusher -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script>
+        // Fitur Realtime Pusher
+        const pusher = new Pusher('8dcb21498ababda58463', {
+            cluster: 'ap1'
+        });
+
+        const channel = pusher.subscribe('scoreboard');
+        channel.bind('update-data', function(data) {
+            document.getElementById('nameA').innerText = data.teamA;
+            document.getElementById('nameB').innerText = data.teamB;
+            document.getElementById('scoreA').innerText = data.scoreA;
+            document.getElementById('scoreB').innerText = data.scoreB;
+        });
+
+        // Fitur Fullscreen
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+
+        // Listener untuk memastikan tombol tersembunyi saat fullscreen
+        document.addEventListener('fullscreenchange', () => {
+            const btn = document.getElementById('btnFullscreen');
+            if (document.fullscreenElement) {
+                btn.style.display = 'none';
+            } else {
+                btn.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
